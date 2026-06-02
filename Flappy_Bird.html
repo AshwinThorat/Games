@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Flappy Bird Final</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    background:#70c5ce;
+    font-family:Arial;
+    overflow:hidden;
+}
+
+#container{
+    position:relative;
+}
+
+/* CANVAS */
+canvas{
+    background:linear-gradient(#70c5ce,#c7f3ff);
+    border:3px solid #333;
+}
+
+/* START MENU */
+#startMenu{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(#70c5ce,#c7f3ff);
+    z-index:500;
+}
+
+.title{
+    font-size:48px;
+    color:white;
+    text-shadow:0 0 10px rgba(0,0,0,0.4);
+}
+
+.subtitle{
+    color:white;
+    margin-top:10px;
+}
+
+#startBtn{
+    margin-top:20px;
+    padding:12px 24px;
+    font-size:20px;
+    border:none;
+    border-radius:12px;
+    background:#ffcc00;
+    cursor:pointer;
+}
+
+/* BIRD */
+#bird{
+    position:absolute;
+    width:48px;
+    height:38px;
+
+    background:linear-gradient(145deg,#ffd400,#ffb800);
+    border:3px solid #d89b00;
+
+    border-radius:50% 55% 45% 50%;
+    box-shadow:0 5px 0 rgba(0,0,0,0.15);
+
+    z-index:100;
+}
+
+.wing{
+    position:absolute;
+    width:22px;
+    height:18px;
+    background:#ffea00;
+    border:2px solid #d89b00;
+    border-radius:50%;
+    left:8px;
+    top:15px;
+}
+
+.eye{
+    position:absolute;
+    width:14px;
+    height:14px;
+    background:white;
+    border-radius:50%;
+    right:8px;
+    top:6px;
+}
+
+.pupil{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:black;
+    border-radius:50%;
+    right:12px;
+    top:10px;
+}
+
+.beak{
+    position:absolute;
+    width:14px;
+    height:10px;
+    background:orange;
+    right:-10px;
+    top:15px;
+    border-radius:2px;
+}
+
+.tail{
+    position:absolute;
+    width:12px;
+    height:12px;
+    background:#ffd400;
+    left:-6px;
+    top:14px;
+    transform:rotate(45deg);
+    border-left:3px solid #d89b00;
+    border-bottom:3px solid #d89b00;
+}
+
+/* GAME OVER */
+#gameOverScreen{
+    position:absolute;
+    inset:0;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,0.6);
+    z-index:300;
+}
+
+#gameOverScreen.show{
+    display:flex;
+}
+
+.panel{
+    background:linear-gradient(#ff3c3c,#ff9a3c);
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    color:white;
+}
+
+#restartBtn{
+    margin-top:10px;
+    padding:10px 20px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div id="container">
+
+<canvas id="game" width="450" height="650"></canvas>
+
+<!-- BIRD -->
+<div id="bird">
+    <div class="wing"></div>
+    <div class="eye"></div>
+    <div class="pupil"></div>
+    <div class="beak"></div>
+    <div class="tail"></div>
+</div>
+
+<!-- START -->
+<div id="startMenu">
+    <h1 class="title">🐦 FLAPPY BIRD</h1>
+    <p class="subtitle">Press Space or Enter</p>
+    <button id="startBtn">START</button>
+</div>
+
+<!-- GAME OVER -->
+<div id="gameOverScreen">
+    <div class="panel">
+        <h1>GAME OVER</h1>
+        <p id="finalScore">Score: 0</p>
+        <button id="restartBtn">Restart</button>
+    </div>
+</div>
+
+</div>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const birdEl = document.getElementById("bird");
+const startMenu = document.getElementById("startMenu");
+const startBtn = document.getElementById("startBtn");
+const gameOverScreen = document.getElementById("gameOverScreen");
+const finalScore = document.getElementById("finalScore");
+const restartBtn = document.getElementById("restartBtn");
+
+let state = "LOBBY";
+
+const bird = {
+    x:100,
+    y:300,
+    v:0,
+    g:0.4,
+    jump:-7.8
+};
+
+let pipes = [];
+let score = 0;
+let interval;
+
+/* PIPE */
+function createPipe(){
+    const gap = 180;
+    const top = Math.random()*220 + 80;
+
+    pipes.push({
+        x:canvas.width,
+        w:70,
+        top:top,
+        bottom:canvas.height-top-gap,
+        scored:false
+    });
+}
+
+/* RESET */
+function reset(){
+    bird.y = 300;
+    bird.v = 0;
+    pipes = [];
+    score = 0;
+
+    createPipe();
+
+    clearInterval(interval);
+    interval = setInterval(()=>{
+        if(state==="PLAY") createPipe();
+    },1800);
+}
+
+/* START */
+function start(){
+    reset();
+    state = "PLAY";
+    startMenu.style.display = "none";
+}
+
+/* GAME OVER */
+function gameOver(){
+    state = "OVER";
+    gameOverScreen.classList.add("show");
+    finalScore.innerText = "Score: " + score;
+}
+
+/* UPDATE */
+function update(){
+    if(state!=="PLAY") return;
+
+    bird.v += bird.g;
+    if(bird.v > 9) bird.v = 9;
+    bird.y += bird.v;
+
+    const r = 20;
+
+    pipes.forEach(p=>{
+        p.x -= 3;
+
+        if(!p.scored && p.x + p.w < bird.x){
+            p.scored = true;
+            score++;
+        }
+
+        if(
+            bird.x+r>p.x &&
+            bird.x-r<p.x+p.w &&
+            (bird.y-r<p.top || bird.y+r>canvas.height-p.bottom)
+        ){
+            gameOver();
+        }
+    });
+
+    pipes = pipes.filter(p=>p.x>-100);
+
+    if(bird.y > canvas.height){
+        gameOver();
+    }
+}
+
+/* DRAW */
+function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    pipes.forEach(p=>{
+        const grad = ctx.createLinearGradient(p.x,0,p.x+p.w,0);
+        grad.addColorStop(0,"#1f8f00");
+        grad.addColorStop(0.5,"#2ecc00");
+        grad.addColorStop(1,"#146600");
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(p.x,0,p.w,p.top);
+        ctx.fillRect(p.x,canvas.height-p.bottom,p.w,p.bottom);
+    });
+
+    ctx.fillStyle="white";
+    ctx.font="30px Arial";
+    ctx.fillText(score,20,40);
+}
+
+/* BIRD RENDER */
+function renderBird(){
+    const rotation = bird.v * 3;
+
+    birdEl.style.left = (bird.x - 24) + "px";
+    birdEl.style.top = (bird.y - 19) + "px";
+    birdEl.style.transform = `rotate(${rotation}deg)`;
+}
+
+function flap(){
+
+    if(state==="LOBBY"){
+        start();
+    }
+
+    if(state==="PLAY"){
+        bird.v = bird.jump;
+    }
+
+    if(state==="OVER"){
+        gameOverScreen.classList.remove("show");
+        start();
+    }
+}
+
+/* LOOP */
+function loop(){
+    update();
+    draw();
+    renderBird();
+    requestAnimationFrame(loop);
+}
+
+/* INPUT CONTROLS */
+
+canvas.addEventListener("click", flap);
+
+canvas.addEventListener("touchstart",(e)=>{
+    e.preventDefault();
+    flap();
+});
+
+document.addEventListener("keydown",(e)=>{
+
+    if(e.code==="Space"){
+        flap();
+    }
+
+    if(e.code==="Enter"){
+
+        if(state==="LOBBY"){
+            start();
+        }
+
+        if(state==="OVER"){
+            gameOverScreen.classList.remove("show");
+            start();
+        }
+    }
+});
+
+/* BUTTONS */
+startBtn.onclick=start;
+
+restartBtn.onclick=()=>{
+    gameOverScreen.classList.remove("show");
+    start();
+};
+
+loop();
+</script>
+
+</body>
+</html>

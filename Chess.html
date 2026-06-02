@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smart Chess Game</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: system-ui, Arial, sans-serif;
+
+    background: radial-gradient(circle at top,
+        #1f2a36,
+        #0f1720,
+        #0b0f14
+    );
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* TOP BAR */
+.topbar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 18px;
+    box-sizing: border-box;
+
+    background: linear-gradient(90deg, #1f2a36, #2c3e50);
+    color: white;
+
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.logo {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.restart-btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.08);
+
+    color: white;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.restart-btn:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-1px);
+}
+
+/* BOARD */
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 70px);
+
+    margin-top: 30px;
+
+    border-radius: 12px;
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,0.6),
+        0 0 0 1px rgba(255,255,255,0.08);
+
+    transform: perspective(900px) rotateX(2deg);
+}
+
+/* CELLS */
+.cell {
+    width: 70px;
+    height: 70px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 34px;
+    user-select: none;
+    cursor: pointer;
+
+    transition: 0.15s;
+
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.w { background: #eeeed2; }
+.b { background: #769656; }
+
+.cell:hover {
+    filter: brightness(0.95);
+}
+
+.selected {
+    outline: 3px solid #ffb300;
+}
+
+/* WIN ANIMATION */
+@keyframes pop {
+    0% { transform: scale(0.3); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); }
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="logo">♟ Smart Chess AI</div>
+    <button class="restart-btn" onclick="reset()">⟲ Restart</button>
+</div>
+
+<div class="board" id="board"></div>
+
+<script>
+const board = document.getElementById("board");
+
+const pieces = {
+ r:"♜",n:"♞",b:"♝",q:"♛",k:"♚",p:"♟",
+ R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",P:"♙"
+};
+
+let state = [
+"r","n","b","q","k","b","n","r",
+"p","p","p","p","p","p","p","p",
+"","","","","","","","",
+"","","","","","","","",
+"","","","","","","","",
+"","","","","","","","",
+"P","P","P","P","P","P","P","P",
+"R","N","B","Q","K","B","N","R"
+];
+
+let selected = null;
+let gameOver = false;
+let turn = "w";
+
+/* UTIL */
+function isWhite(p){ return p && p === p.toUpperCase(); }
+function isBlack(p){ return p && p === p.toLowerCase(); }
+
+/* DRAW */
+function draw(){
+    board.innerHTML = "";
+
+    state.forEach((p,i)=>{
+        let div = document.createElement("div");
+
+        let x = i % 8;
+        let y = Math.floor(i / 8);
+
+        div.className = "cell " + ((x+y)%2 ? "b" : "w");
+
+        if(selected === i) div.classList.add("selected");
+
+        div.innerText = pieces[p] || "";
+        div.onclick = () => move(i);
+
+        board.appendChild(div);
+    });
+}
+
+/* PATH CHECK */
+function isPathClear(from,to){
+    let fx=from%8, fy=Math.floor(from/8);
+    let tx=to%8, ty=Math.floor(to/8);
+
+    let dx=Math.sign(tx-fx);
+    let dy=Math.sign(ty-fy);
+
+    let x=fx+dx, y=fy+dy;
+
+    while(x!==tx || y!==ty){
+        if(state[y*8+x] !== "") return false;
+        x+=dx; y+=dy;
+    }
+    return true;
+}
+
+/* LEGAL MOVES */
+function legal(from,to){
+    let p = state[from];
+    let t = state[to];
+    if(!p) return false;
+    if(t && isWhite(p) === isWhite(t)) return false;
+
+    let dx=(to%8)-(from%8);
+    let dy=Math.floor(to/8)-Math.floor(from/8);
+    let type=p.toLowerCase();
+
+    switch(type){
+        case "p":
+            let dir = isWhite(p) ? -1 : 1;
+            let start = isWhite(p) ? 6 : 1;
+
+            if(dx===0 && dy===dir && !t) return true;
+            if(dx===0 && dy===2*dir && !t && Math.floor(from/8)===start)
+                return isPathClear(from,to);
+            if(Math.abs(dx)===1 && dy===dir && t) return true;
+            return false;
+
+        case "r":
+            return (dx===0||dy===0) && isPathClear(from,to);
+
+        case "b":
+            return Math.abs(dx)===Math.abs(dy) && isPathClear(from,to);
+
+        case "q":
+            return (dx===0||dy===0||Math.abs(dx)===Math.abs(dy)) && isPathClear(from,to);
+
+        case "n":
+            return (Math.abs(dx)===1&&Math.abs(dy)===2) ||
+                   (Math.abs(dx)===2&&Math.abs(dy)===1);
+
+        case "k":
+            return Math.abs(dx)<=1 && Math.abs(dy)<=1;
+    }
+    return false;
+}
+
+/* MOVE */
+function move(i){
+    if(gameOver || turn !== "w") return;
+
+    if(selected === null){
+        if(state[i] && isWhite(state[i])) selected = i;
+        draw();
+        return;
+    }
+
+    if(legal(selected,i)){
+        state[i] = state[selected];
+        state[selected] = "";
+        selected = null;
+
+        draw();
+        check();
+
+        turn = "b";
+        if(!gameOver) setTimeout(bot, 250);
+    } else {
+        selected = null;
+    }
+
+    draw();
+}
+
+/* =======================
+   🧠 SMART BOT AI
+======================= */
+
+function pieceValue(p){
+    switch(p.toLowerCase()){
+        case "p": return 10;
+        case "n": return 30;
+        case "b": return 30;
+        case "r": return 50;
+        case "q": return 90;
+        case "k": return 900;
+    }
+    return 0;
+}
+
+function evaluateMove(from,to){
+    let score = 0;
+
+    let moving = state[from];
+    let target = state[to];
+
+    // capture value
+    if(target){
+        score += pieceValue(target) * 10;
+    }
+
+    // center control
+    let tx = to % 8;
+    let ty = Math.floor(to / 8);
+    let centerDist = Math.abs(3.5 - tx) + Math.abs(3.5 - ty);
+    score += (8 - centerDist);
+
+    // slight randomness
+    score += Math.random() * 2;
+
+    // protect queen slightly
+    if(moving.toLowerCase() === "q") score += 5;
+
+    return score;
+}
+
+/* BOT */
+function bot(){
+    let moves = [];
+
+    for(let i=0;i<64;i++){
+        if(state[i] && isBlack(state[i])){
+            for(let j=0;j<64;j++){
+                if(legal(i,j)){
+                    moves.push({from:i,to:j});
+                }
+            }
+        }
+    }
+
+    if(moves.length === 0){
+        turn = "w";
+        return;
+    }
+
+    let bestMove = null;
+    let bestScore = -Infinity;
+
+    for(let m of moves){
+        let score = evaluateMove(m.from, m.to);
+        if(score > bestScore){
+            bestScore = score;
+            bestMove = m;
+        }
+    }
+
+    if(bestMove){
+        state[bestMove.to] = state[bestMove.from];
+        state[bestMove.from] = "";
+    }
+
+    draw();
+    check();
+    turn = "w";
+}
+
+/* WIN CHECK */
+function check(){
+    let wKing = state.includes("K");
+    let bKing = state.includes("k");
+
+    if(!wKing || !bKing){
+        gameOver = true;
+
+        const winner = !wKing ? "BLACK" : "WHITE";
+
+        let overlay = document.createElement("div");
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.background = "rgba(0,0,0,0.85)";
+        overlay.style.display = "flex";
+        overlay.style.flexDirection = "column";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.color = "white";
+        overlay.style.zIndex = "9999";
+        overlay.style.textAlign = "center";
+
+        overlay.innerHTML = `
+            <div style="
+                font-size: 60px;
+                animation: pop 0.6s ease;
+                text-shadow: 0 0 20px gold;
+            ">🏆 ${winner} WINS!</div>
+
+            <div style="margin-top:10px; font-size:18px; opacity:0.8;">
+                Smart AI Game Over
+            </div>
+
+            <button onclick="location.reload()" style="
+                margin-top:25px;
+                padding:12px 20px;
+                font-size:16px;
+                font-weight:bold;
+                border:none;
+                border-radius:10px;
+                cursor:pointer;
+                background:linear-gradient(135deg,gold,orange);
+                box-shadow:0 10px 25px rgba(255,200,0,0.4);
+            ">
+                Play Again
+            </button>
+        `;
+
+        document.body.appendChild(overlay);
+    }
+}
+
+/* RESET */
+function reset(){
+    location.reload();
+}
+
+/* START */
+draw();
+</script>
+
+</body>
+</html>

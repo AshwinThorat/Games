@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Game Hub</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:system-ui,sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:
+    radial-gradient(circle at top,#2c3e50,#111827,#05070a);
+
+    overflow:hidden;
+}
+
+/* Animated Background */
+body::before{
+    content:"";
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+    radial-gradient(circle,#00ffff22 1px,transparent 1px);
+    background-size:40px 40px;
+    animation:move 20s linear infinite;
+}
+
+@keyframes move{
+    from{transform:translate(0,0);}
+    to{transform:translate(-100px,-100px);}
+}
+
+.container{
+    position:relative;
+    z-index:2;
+    width:1100px;
+    max-width:95%;
+    text-align:center;
+}
+
+.title{
+    color:white;
+    font-size:4rem;
+    font-weight:900;
+    letter-spacing:3px;
+
+    text-shadow:
+    0 0 15px cyan,
+    0 0 40px #00ffff55;
+
+    margin-bottom:15px;
+}
+
+.subtitle{
+    color:#b8c5d6;
+    margin-bottom:50px;
+    font-size:1.1rem;
+}
+
+.games{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:30px;
+}
+
+/* CARD */
+.card{
+    background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(12px);
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    border-radius:25px;
+    padding:35px;
+
+    transition:.35s;
+
+    box-shadow:
+    0 15px 40px rgba(0,0,0,.4);
+}
+
+.card:hover{
+    transform:translateY(-8px) scale(1.02);
+
+    box-shadow:
+    0 20px 50px rgba(0,255,255,.15);
+
+    border-color:#00ffff55;
+}
+
+.icon{
+    font-size:70px;
+    margin-bottom:15px;
+}
+
+.card h2{
+    color:white;
+    margin-bottom:12px;
+}
+
+.card p{
+    color:#cbd5e1;
+    line-height:1.5;
+    min-height:70px;
+}
+
+/* BUTTON */
+.play-btn{
+    display:inline-block;
+    margin-top:25px;
+
+    text-decoration:none;
+    color:white;
+
+    padding:14px 30px;
+    border-radius:12px;
+
+    background:
+    linear-gradient(
+        135deg,
+        #00d4ff,
+        #0066ff
+    );
+
+    font-weight:700;
+    letter-spacing:1px;
+
+    transition:.3s;
+}
+
+.play-btn:hover{
+    transform:scale(1.06);
+
+    box-shadow:
+    0 0 25px #00d4ff;
+}
+
+.footer{
+    margin-top:40px;
+    color:#7f8c9c;
+    font-size:.9rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="title">🎮 GAME HUB</h1>
+
+    <p class="subtitle">
+        Choose your challenge and start playing.
+    </p>
+
+    <div class="games">
+
+        <!-- CHESS -->
+        <div class="card">
+            <div class="icon">♟️</div>
+            <h2>Smart Chess AI</h2>
+            <p>
+                Battle against an intelligent chess AI and test your strategy skills.
+            </p>
+
+            <a href="chess.html" class="play-btn">
+                PLAY CHESS
+            </a>
+        </div>
+
+        <!-- FLAPPY -->
+        <div class="card">
+            <div class="icon">🐦</div>
+            <h2>Flappy Bird</h2>
+            <p>
+                Fly through endless pipes, avoid collisions and beat your high score.
+            </p>
+
+            <a href="flappy_Bird.html" class="play-btn">
+                PLAY FLAPPY
+            </a>
+        </div>
+
+        <!-- TIC TAC TOE -->
+        <div class="card">
+            <div class="icon">☠️</div>
+            <h2>Horror Tic Tac Toe</h2>
+            <p>
+                Face the unbeatable AI in a dark horror-themed Tic Tac Toe experience.
+            </p>
+
+            <a href="tic_tac_toe.html" class="play-btn">
+                ENTER IF YOU DARE
+            </a>
+        </div>
+
+    </div>
+
+    <div class="footer">
+        Built with HTML • CSS • JavaScript
+    </div>
+
+</div>
+
+</body>
+</html>
