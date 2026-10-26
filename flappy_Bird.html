@@ -1,166 +1,229 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Flappy Bird Final</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>Responsive Flappy Bird</title>
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-body{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    background:#70c5ce;
-    font-family:Arial;
-    overflow:hidden;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
 }
 
-#container{
-    position:relative;
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #70c5ce;
+    font-family: Arial, sans-serif;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
 }
 
-/* CANVAS */
-canvas{
-    background:linear-gradient(#70c5ce,#c7f3ff);
-    border:3px solid #333;
+#container {
+    position: relative;
+    width: min(100vw, calc(100dvh * 450 / 650));
+    aspect-ratio: 450 / 650;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
-/* START MENU */
-#startMenu{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    background:linear-gradient(#70c5ce,#c7f3ff);
-    z-index:500;
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(#70c5ce, #c7f3ff);
+    border: 2px solid #333;
+    touch-action: none;
 }
 
-.title{
-    font-size:48px;
-    color:white;
-    text-shadow:0 0 10px rgba(0,0,0,0.4);
+#bird {
+    position: absolute;
+    width: 10.67%;
+    height: 5.85%;
+    background: linear-gradient(145deg, #ffd400, #ffb800);
+    border: 3px solid #d89b00;
+    border-radius: 50% 55% 45% 50%;
+    box-shadow: 0 5px 0 rgba(0,0,0,.15);
+    z-index: 100;
+    pointer-events: none;
+    transform-origin: center;
 }
 
-.subtitle{
-    color:white;
-    margin-top:10px;
+.wing {
+    position: absolute;
+    width: 48%;
+    height: 47%;
+    background: #ffea00;
+    border: 2px solid #d89b00;
+    border-radius: 50%;
+    left: 17%;
+    top: 39%;
 }
 
-#startBtn{
-    margin-top:20px;
-    padding:12px 24px;
-    font-size:20px;
-    border:none;
-    border-radius:12px;
-    background:#ffcc00;
-    cursor:pointer;
+.eye {
+    position: absolute;
+    width: 31%;
+    aspect-ratio: 1;
+    background: white;
+    border-radius: 50%;
+    right: 17%;
+    top: 15%;
 }
 
-/* BIRD */
-#bird{
-    position:absolute;
-    width:48px;
-    height:38px;
-
-    background:linear-gradient(145deg,#ffd400,#ffb800);
-    border:3px solid #d89b00;
-
-    border-radius:50% 55% 45% 50%;
-    box-shadow:0 5px 0 rgba(0,0,0,0.15);
-
-    z-index:100;
+.pupil {
+    position: absolute;
+    width: 14%;
+    aspect-ratio: 1;
+    background: black;
+    border-radius: 50%;
+    right: 27%;
+    top: 28%;
 }
 
-.wing{
-    position:absolute;
-    width:22px;
-    height:18px;
-    background:#ffea00;
-    border:2px solid #d89b00;
-    border-radius:50%;
-    left:8px;
-    top:15px;
+.beak {
+    position: absolute;
+    width: 31%;
+    height: 26%;
+    background: orange;
+    right: -20%;
+    top: 39%;
+    border-radius: 2px;
 }
 
-.eye{
-    position:absolute;
-    width:14px;
-    height:14px;
-    background:white;
-    border-radius:50%;
-    right:8px;
-    top:6px;
+.tail {
+    position: absolute;
+    width: 25%;
+    aspect-ratio: 1;
+    background: #ffd400;
+    left: -13%;
+    top: 37%;
+    transform: rotate(45deg);
+    border-left: 3px solid #d89b00;
+    border-bottom: 3px solid #d89b00;
 }
 
-.pupil{
-    position:absolute;
-    width:6px;
-    height:6px;
-    background:black;
-    border-radius:50%;
-    right:12px;
-    top:10px;
+#startMenu {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    text-align: center;
+    background: linear-gradient(#70c5ce, #c7f3ff);
+    z-index: 500;
 }
 
-.beak{
-    position:absolute;
-    width:14px;
-    height:10px;
-    background:orange;
-    right:-10px;
-    top:15px;
-    border-radius:2px;
+.title {
+    font-size: clamp(22px, 8vw, 48px);
+    color: white;
+    text-shadow: 0 0 10px rgba(0,0,0,.4);
 }
 
-.tail{
-    position:absolute;
-    width:12px;
-    height:12px;
-    background:#ffd400;
-    left:-6px;
-    top:14px;
-    transform:rotate(45deg);
-    border-left:3px solid #d89b00;
-    border-bottom:3px solid #d89b00;
+.subtitle {
+    color: #fff;
+    margin-top: 10px;
+    font-size: clamp(12px, 3.5vw, 18px);
+    text-shadow: 0 1px 3px #27727a;
 }
 
-/* GAME OVER */
-#gameOverScreen{
-    position:absolute;
-    inset:0;
-    display:none;
-    justify-content:center;
-    align-items:center;
-    background:rgba(0,0,0,0.6);
-    z-index:300;
+button {
+    font: inherit;
+    cursor: pointer;
+    touch-action: manipulation;
 }
 
-#gameOverScreen.show{
-    display:flex;
+#startBtn {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: clamp(16px, 4vw, 20px);
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    background: #ffcc00;
+    color: #222;
 }
 
-.panel{
-    background:linear-gradient(#ff3c3c,#ff9a3c);
-    padding:30px;
-    border-radius:20px;
-    text-align:center;
-    color:white;
+#startBtn:active,
+#restartBtn:active {
+    transform: scale(.96);
 }
 
-#restartBtn{
-    margin-top:10px;
-    padding:10px 20px;
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
+#gameOverScreen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    background: rgba(0,0,0,.6);
+    z-index: 300;
+}
+
+#gameOverScreen.show {
+    display: flex;
+}
+
+.panel {
+    width: min(100%, 300px);
+    background: linear-gradient(#ff3c3c, #ff9a3c);
+    padding: clamp(18px, 6%, 30px);
+    border-radius: 20px;
+    text-align: center;
+    color: white;
+    overflow-wrap: anywhere;
+}
+
+.panel h1 {
+    font-size: clamp(22px, 6vw, 34px);
+}
+
+.panel p {
+    margin-top: 10px;
+}
+
+#restartBtn {
+    margin-top: 16px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 10px;
+    background: #ffcc00;
+    color: #222;
+    font-weight: bold;
+}
+
+button:focus-visible {
+    outline: 3px solid white;
+    outline-offset: 3px;
+}
+
+/* Short landscape screens */
+@media (orientation: landscape) and (max-height: 500px) {
+    #container {
+        width: min(100vw, calc(100dvh * 450 / 650));
+    }
+
+    #startBtn {
+        margin-top: 10px;
+        padding: 8px 18px;
+    }
+
+    .subtitle {
+        margin-top: 5px;
+    }
 }
 </style>
 </head>
@@ -168,39 +231,37 @@ canvas{
 <body>
 
 <div id="container">
+    <canvas id="game" width="450" height="650"
+        aria-label="Flappy Bird game. Tap or press Space to flap."></canvas>
 
-<canvas id="game" width="450" height="650"></canvas>
-
-<!-- BIRD -->
-<div id="bird">
-    <div class="wing"></div>
-    <div class="eye"></div>
-    <div class="pupil"></div>
-    <div class="beak"></div>
-    <div class="tail"></div>
-</div>
-
-<!-- START -->
-<div id="startMenu">
-    <h1 class="title">🐦 FLAPPY BIRD</h1>
-    <p class="subtitle">Press Space or Enter</p>
-    <button id="startBtn">START</button>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameOverScreen">
-    <div class="panel">
-        <h1>GAME OVER</h1>
-        <p id="finalScore">Score: 0</p>
-        <button id="restartBtn">Restart</button>
+    <div id="bird" aria-hidden="true">
+        <div class="wing"></div>
+        <div class="eye"></div>
+        <div class="pupil"></div>
+        <div class="beak"></div>
+        <div class="tail"></div>
     </div>
-</div>
 
+    <div id="startMenu">
+        <h1 class="title">🐦 FLAPPY BIRD</h1>
+        <p class="subtitle">Tap or press Space to fly</p>
+        <button id="startBtn">START</button>
+    </div>
+
+    <div id="gameOverScreen" role="dialog"
+         aria-modal="true" aria-labelledby="gameOverTitle">
+        <div class="panel">
+            <h1 id="gameOverTitle">GAME OVER</h1>
+            <p id="finalScore">Score: 0</p>
+            <button id="restartBtn">Restart</button>
+        </div>
+    </div>
 </div>
 
 <script>
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
+const container = document.getElementById("container");
 
 const birdEl = document.getElementById("bird");
 const startMenu = document.getElementById("startMenu");
@@ -209,187 +270,224 @@ const gameOverScreen = document.getElementById("gameOverScreen");
 const finalScore = document.getElementById("finalScore");
 const restartBtn = document.getElementById("restartBtn");
 
+const W = 450;
+const H = 650;
+
 let state = "LOBBY";
-
-const bird = {
-    x:100,
-    y:300,
-    v:0,
-    g:0.4,
-    jump:-7.8
-};
-
 let pipes = [];
 let score = 0;
-let interval;
+let lastPipeTime = 0;
+let previousTime = 0;
+let animationId = 0;
 
-/* PIPE */
-function createPipe(){
+const bird = {
+    x: 100,
+    y: 300,
+    v: 0,
+    g: 0.4,
+    jump: -7.8
+};
+
+/* Scale DOM bird coordinates to the responsive game area. */
+
+function renderBird() {
+    const scale = container.clientWidth / W;
+    const birdWidth = 48;
+    const birdHeight = 38;
+
+    birdEl.style.left =
+        ((bird.x - birdWidth / 2) / W * 100) + "%";
+
+    birdEl.style.top =
+        ((bird.y - birdHeight / 2) / H * 100) + "%";
+
+    const rotation = Math.max(
+        -25,
+        Math.min(70, bird.v * 3)
+    );
+
+    birdEl.style.transform = "rotate(" + rotation + "deg)";
+}
+
+
+/* Create a pipe pair. */
+function createPipe() {
     const gap = 180;
-    const top = Math.random()*220 + 80;
+    const top = Math.random() * 220 + 80;
 
     pipes.push({
-        x:canvas.width,
-        w:70,
-        top:top,
-        bottom:canvas.height-top-gap,
-        scored:false
+        x: W,
+        w: 70,
+        top: top,
+        bottom: H - top - gap,
+        scored: false
     });
 }
 
-/* RESET */
-function reset(){
+/* Reset the round. */
+function reset() {
     bird.y = 300;
     bird.v = 0;
     pipes = [];
     score = 0;
+    lastPipeTime = 0;
+    previousTime = 0;
 
     createPipe();
-
-    clearInterval(interval);
-    interval = setInterval(()=>{
-        if(state==="PLAY") createPipe();
-    },1800);
+    renderBird();
+    draw();
 }
 
-/* START */
-function start(){
+/* Start or restart. */
+function start() {
     reset();
     state = "PLAY";
     startMenu.style.display = "none";
+    gameOverScreen.classList.remove("show");
 }
 
-/* GAME OVER */
-function gameOver(){
+/* End the round. */
+function gameOver() {
+    if (state !== "PLAY") return;
+
     state = "OVER";
+    finalScore.textContent = "Score: " + score;
     gameOverScreen.classList.add("show");
-    finalScore.innerText = "Score: " + score;
 }
 
-/* UPDATE */
-function update(){
-    if(state!=="PLAY") return;
+/* Update physics using elapsed time for consistent speed. */
+function update(dt, now) {
+    if (state !== "PLAY") return;
 
-    bird.v += bird.g;
-    if(bird.v > 9) bird.v = 9;
-    bird.y += bird.v;
+    const step = Math.min(dt, 2);
 
-    const r = 20;
+    bird.v += bird.g * step;
+    bird.v = Math.min(bird.v, 9);
+    bird.y += bird.v * step;
 
-    pipes.forEach(p=>{
-        p.x -= 3;
+    if (now - lastPipeTime >= 1800) {
+        createPipe();
+        lastPipeTime = now;
+    }
 
-        if(!p.scored && p.x + p.w < bird.x){
+    const r = 17;
+
+    for (const p of pipes) {
+        p.x -= 3 * step;
+
+        if (!p.scored && p.x + p.w < bird.x) {
             p.scored = true;
             score++;
         }
 
-        if(
-            bird.x+r>p.x &&
-            bird.x-r<p.x+p.w &&
-            (bird.y-r<p.top || bird.y+r>canvas.height-p.bottom)
-        ){
+        if (
+            bird.x + r > p.x &&
+            bird.x - r < p.x + p.w &&
+            (bird.y - r < p.top ||
+             bird.y + r > H - p.bottom)
+        ) {
             gameOver();
+            break;
         }
-    });
+    }
 
-    pipes = pipes.filter(p=>p.x>-100);
+    pipes = pipes.filter(p => p.x > -100);
 
-    if(bird.y > canvas.height){
+    if (bird.y - r < 0 || bird.y + r > H) {
         gameOver();
     }
 }
 
-/* DRAW */
-function draw(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
+/* Draw pipes and score. */
+function draw() {
+    ctx.clearRect(0, 0, W, H);
 
-    pipes.forEach(p=>{
-        const grad = ctx.createLinearGradient(p.x,0,p.x+p.w,0);
-        grad.addColorStop(0,"#1f8f00");
-        grad.addColorStop(0.5,"#2ecc00");
-        grad.addColorStop(1,"#146600");
+    for (const p of pipes) {
+        const grad = ctx.createLinearGradient(p.x, 0, p.x + p.w, 0);
+        grad.addColorStop(0, "#1f8f00");
+        grad.addColorStop(0.5, "#2ecc00");
+        grad.addColorStop(1, "#146600");
 
         ctx.fillStyle = grad;
-        ctx.fillRect(p.x,0,p.w,p.top);
-        ctx.fillRect(p.x,canvas.height-p.bottom,p.w,p.bottom);
-    });
-
-    ctx.fillStyle="white";
-    ctx.font="30px Arial";
-    ctx.fillText(score,20,40);
-}
-
-/* BIRD RENDER */
-function renderBird(){
-    const rotation = bird.v * 3;
-
-    birdEl.style.left = (bird.x - 24) + "px";
-    birdEl.style.top = (bird.y - 19) + "px";
-    birdEl.style.transform = `rotate(${rotation}deg)`;
-}
-
-function flap(){
-
-    if(state==="LOBBY"){
-        start();
+        ctx.fillRect(p.x, 0, p.w, p.top);
+        ctx.fillRect(p.x, H - p.bottom, p.w, p.bottom);
     }
 
-    if(state==="PLAY"){
-        bird.v = bird.jump;
-    }
-
-    if(state==="OVER"){
-        gameOverScreen.classList.remove("show");
-        start();
-    }
+    ctx.fillStyle = "white";
+    ctx.strokeStyle = "rgba(0,0,0,.35)";
+    ctx.lineWidth = 2;
+    ctx.font = "bold 30px Arial";
+    ctx.textAlign = "left";
+    ctx.strokeText(String(score), 20, 40);
+    ctx.fillText(String(score), 20, 40);
 }
 
-/* LOOP */
-function loop(){
-    update();
+/* Main animation loop. */
+function loop(now) {
+    const dt = previousTime
+        ? (now - previousTime) / (1000 / 60)
+        : 1;
+
+    previousTime = now;
+
+    update(dt, now);
     draw();
     renderBird();
-    requestAnimationFrame(loop);
+
+    animationId = requestAnimationFrame(loop);
 }
 
-/* INPUT CONTROLS */
+/* Unified input handling. */
+function flap() {
+    if (state === "LOBBY") {
+        start();
+        return;
+    }
 
-canvas.addEventListener("click", flap);
+    if (state === "PLAY") {
+        bird.v = bird.jump;
+        return;
+    }
 
-canvas.addEventListener("touchstart",(e)=>{
-    e.preventDefault();
+    if (state === "OVER") {
+        start();
+    }
+}
+
+/* Pointer supports touch, pen, and mouse without duplicate events. */
+canvas.addEventListener("pointerdown", event => {
+    event.preventDefault();
     flap();
 });
 
-document.addEventListener("keydown",(e)=>{
+startBtn.addEventListener("click", start);
 
-    if(e.code==="Space"){
-        flap();
+restartBtn.addEventListener("click", start);
+
+document.addEventListener("keydown", event => {
+    if (event.code === "Space" || event.code === "ArrowUp") {
+        event.preventDefault();
+
+        if (!event.repeat) flap();
     }
 
-    if(e.code==="Enter"){
-
-        if(state==="LOBBY"){
-            start();
-        }
-
-        if(state==="OVER"){
-            gameOverScreen.classList.remove("show");
-            start();
-        }
+    if (event.code === "Enter" && state !== "PLAY") {
+        event.preventDefault();
+        start();
     }
 });
 
-/* BUTTONS */
-startBtn.onclick=start;
+/* Recalculate layout after resize or device rotation. */
+function handleResize() {
+    renderBird();
+}
 
-restartBtn.onclick=()=>{
-    gameOverScreen.classList.remove("show");
-    start();
-};
+window.addEventListener("resize", handleResize);
+window.addEventListener("orientationchange", handleResize);
 
-loop();
+/* Initialize. */
+reset();
+animationId = requestAnimationFrame(loop);
 </script>
 
 </body>
